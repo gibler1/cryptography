@@ -67,4 +67,21 @@ public class Word
 		bits[2] = third;
 		bits[3] = fourth;
 	}
+	public Word xor(Word other)
+	{
+		return this.bits.Zip(other.bits, (a,b) => a ^ b);
+	}
+	public Word and(Word other)
+	{
+
+	}
+	public Word or(Word other)
+	{
+
+	}
+	public Word complement()
+	{
+
+	}
+	3
 }

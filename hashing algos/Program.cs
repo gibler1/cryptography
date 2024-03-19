@@ -15,6 +15,8 @@ namespace hashing_algos
         static void Main()
         {
             Hashfunctions.MD4("hi");
+            byte d = 1
+            d
             Console.WriteLine("success");
             Console.WriteLine("hello world");
             Application.EnableVisualStyles();
