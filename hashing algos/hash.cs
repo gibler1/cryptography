@@ -60,28 +60,46 @@ class Hashfunctions
 public class Word
 {
 	private byte[] bits = new byte[4];
-	void makeword(byte first, byte second, byte third, byte fourth)
+	public Word(byte first, byte second, byte third, byte fourth)
 	{
 		bits[0] = first;
 		bits[1] = second;
 		bits[2] = third;
 		bits[3] = fourth;
 	}
+	//returns the bitwise xor of 2 words without changing the state
 	public Word xor(Word other)
 	{
-		return this.bits.Zip(other.bits, (a,b) => a ^ b);
+		byte[] newbytes = bits.Zip(other.bits, (a, b) => (byte)(a ^ b)).ToArray();
+		Word newword = new Word(newbytes[0], newbytes[1], newbytes[2], newbytes[3]);
+		return newword;
 	}
-	public Word and(Word other)
+    
+	//returns the bitwise and of 2 words without changing the state
+    public Word and(Word other)
 	{
+        byte[] newbytes = bits.Zip(other.bits, (a, b) => (byte)(a & b)).ToArray();
+        Word newword = new Word(newbytes[0], newbytes[1], newbytes[2], newbytes[3]);
+        return newword;
+    }
 
-	}
-	public Word or(Word other)
+    //returns the bitwise or of 2 words without changing the state
+    public Word or(Word other)
 	{
+        byte[] newbytes = bits.Zip(other.bits, (a, b) => (byte)(a | b)).ToArray();
+        Word newword = new Word(newbytes[0], newbytes[1], newbytes[2], newbytes[3]);
+        return newword;
+    }
 
-	}
-	public Word complement()
+    //returns the bitwise complement of 2 words without changing the state
+    public Word complement()
 	{
-
-	}
-	3
+        byte[] newbytes = new byte[4];
+		for(int i= 0;i < 4; i++)
+		{
+			newbytes[i] = (byte)(~bits[i]);
+		}
+        Word newword = new Word(newbytes[0], newbytes[1], newbytes[2], newbytes[3]);
+        return newword;
+    }
 }
