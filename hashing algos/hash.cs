@@ -40,10 +40,10 @@ class Hashfunctions
 		words.AddRange(bitrep.GetRange(0, 4));
 
 		//Step 3: Initialising message digest(MD) buffer
-		List<byte> A = new List<byte> { 1, 35, 69, 103};
-		List<byte> B = new List<byte> { 137, 171, 205, 239};
-        List<byte> C = new List<byte> { 254, 222, 186, 152 };
-        List<byte> D = new List<byte> { 118, 84, 50, 16 };
+		Word A = new Word(1, 35, 69, 103);
+		Word B = new Word(137, 171, 205, 239);
+        Word C = new Word(254, 222, 186, 152);
+        Word D = new Word(118, 84, 50, 16);
 		//Note: potential bug here since the buffer words are not initialised using low order bytes first
 
 		//Step 4:process the message using 48 rounds
@@ -53,10 +53,20 @@ class Hashfunctions
 		 * g(X,Y,Z) = XY v XZ v YZ
 		 * h(X,Y,Z) = X xor Y xor Z
 		 */
-		
+		Word f(Word x,Word y, Word z)
+		{
+			return (x.and(y)).or((x.complement()).and(z));
+		}
+        Word g(Word x, Word y, Word z)
+        {
+            return (x.and(y)).or((x.complement()).and(z));
+        }
+
     }
 }
-//class to allow for easy bitwise operations on 32
+/*class to allow for easy bitwise operations on 32bits.
+ *methods:xor, and, or, complement
+ */
 public class Word
 {
 	private byte[] bits = new byte[4];
@@ -67,6 +77,7 @@ public class Word
 		bits[2] = third;
 		bits[3] = fourth;
 	}
+
 	//returns the bitwise xor of 2 words without changing the state
 	public Word xor(Word other)
 	{
@@ -91,7 +102,7 @@ public class Word
         return newword;
     }
 
-    //returns the bitwise complement of 2 words without changing the state
+    //returns the bitwise complement without changing the state
     public Word complement()
 	{
         byte[] newbytes = new byte[4];
