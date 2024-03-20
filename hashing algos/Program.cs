@@ -14,10 +14,8 @@ namespace hashing_algos
         [STAThread]
         static void Main()
         {
-            Hashfunctions.MD4("hi");
-            byte d = 1
-            d
-            Console.WriteLine("success");
+            String result = Hashfunctions.MD4("hi");
+            Console.WriteLine(result);
             Console.WriteLine("hello world");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
