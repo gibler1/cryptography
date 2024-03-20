@@ -422,7 +422,7 @@ public class Word : ICloneable
 	public String toHexString()
 	{
 		Array.Reverse(bits);
-        String answer =  BitConverter.ToString(bits).Replace("-", "");
+        String answer =  BitConverter.ToString(bits).Replace("-", "").ToLower();
 		Array.Reverse(bits);
 		return answer;
     }

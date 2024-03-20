@@ -14,7 +14,7 @@ namespace hashing_algos
         [STAThread]
         static void Main()
         {
-            String result = Hashfunctions.MD5("hello");
+            String result = Hashfunctions.MD5("hello ");
             Console.WriteLine(result);
             Console.WriteLine("hello world");
             Application.EnableVisualStyles();
