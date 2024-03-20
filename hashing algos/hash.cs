@@ -9,46 +9,28 @@ class Hashfunctions
 	static public String MD4(string message)
 	{
 		List<byte> words = Encoding.ASCII.GetBytes(message).ToList();//turn string into byte format to make it easier to work with
-		foreach (byte wor in words)//testing loop
-		{
-			Console.WriteLine(wor);
-		}
+
 		//Step 1: appending padding bits to message
-		long b = 8 * words.Count;
+		long originalBitLen = 8 * words.Count;
 		words.Add((byte)128);
-		long bitlength = b + 8;
-		long padlength = 0;
-		if (bitlength % 512 > 448)
-		{
-			padlength = 960 - bitlength % 512;
-		}
-		else if (bitlength % 512 < 448)
-		{
-			padlength = 448 - bitlength % 512;
-		}
-		//Assert(padlength%8==0);
-		while (padlength > 0)//loop to add continuous zeroes onto the end of out bit message till bitlength=448mod512
+		long bitlength = originalBitLen + 8;
+		while (bitlength%512 != 448)//loop to add continuous zeroes onto the end of out bit message till bitlength=448mod512
 		{
 			words.Add((byte)0);
-			padlength -= 8;
+			bitlength += 8;
 		}
-		//Note:above code can be shortened by changing while loop condition and continuously updating bitlength
 
 		//Step 2: Append the 64-bit representation of the original number of bits to the list
-		List<byte> bitrep = BitConverter.GetBytes(b).ToList();
+		List<byte> bitrep = BitConverter.GetBytes(originalBitLen).ToList();
 		words.AddRange(bitrep);
-
-		long N = words.Count/4;
-        Console.WriteLine("N is:" + N);
-       
-
+		long N = words.Count/4;//number of 32-bit blocks
 
         //Step 3: Initialising message digest(MD) buffer
-        Word A = new Word((byte)103, (byte)69, (byte)35, (byte)1);
-		Word B = new Word((byte)239, (byte)205, (byte)171, (byte)137);
-        Word C = new Word((byte)152, (byte)186, (byte)220, (byte)254);
-        Word D = new Word((byte)16, (byte)50, (byte)84, (byte)118);
-		Console.WriteLine(A.toHexString() + B.toHexString() + C.toHexString() + D.toHexString());
+        Word A = new Word((byte)103, (byte)69, (byte)35, (byte)1);//01 23 45 67
+        Word B = new Word((byte)239, (byte)205, (byte)171, (byte)137);//89 ab cd ef
+        Word C = new Word((byte)152, (byte)186, (byte)220, (byte)254);//fe de ba 98
+        Word D = new Word((byte)16, (byte)50, (byte)84, (byte)118);//76 54 32 10
+
         //Step 4:process the message using 48 rounds
 
         /* auxillary equations outline:
@@ -58,12 +40,7 @@ class Hashfunctions
 		 */
         Word f(Word x,Word y, Word z)
 		{
-			Word temp = x.complement();
-			temp = temp.and(z);
-			Word temp2 = x.and(y);
-			temp = temp.or(temp2);
-			return temp;
-			//return (x.and(y)).or((x.complement()).and(z));
+			return (x.and(y)).or((x.complement()).and(z));
 		}
         Word g(Word x, Word y, Word z)
         {
@@ -74,7 +51,7 @@ class Hashfunctions
             return (x.xor(y)).xor(z);
         }
 
-        //Loop to iterate over blocks:
+        //Loop to iterate over the padded message in 512bit blocks using 48 rounds for each block:
         for (int i = 0; i < N / 16; i++)
 		{
 			//initialise the variables which will be used in this block
@@ -92,10 +69,7 @@ class Hashfunctions
             //r1 represents [A B C D i s] which denotes: A = (A+ f(B,C,D) + X[i]) <<< s 
             void r1(ref Word f1,Word f2, Word f3, Word f4, int a, int s)
 			{
-				Word temp = f(f2, f3, f4);
-				temp = temp.add(f1);
-				temp = temp.add(X[a]);
-				//Word temp = (X[a].add((f1.add(f(f2, f3, f4)))));
+				Word temp = (X[a].add((f1.add(f(f2, f3, f4)))));
 				temp.shift(s);
 				f1 = temp;
 			}
@@ -120,12 +94,8 @@ class Hashfunctions
             //r2 represents [A B C D i s] which now denotes: A = (A+ g(B,C,D) + X[i] + 5A827999) <<< s 
             void r2(ref Word f1, Word f2, Word f3, Word f4, int a, int s)
             {
-				Word constant = new Word((byte)90, (byte)130, (byte)121, (byte)153);
-                Word temp = g(f2, f3, f4);
-                temp = temp.add(f1);
-                temp = temp.add(X[a]);
-				temp = temp.add(constant);
-                //Word temp = (X[a].add((f1.add(g(f2, f3, f4))))).add(constant);
+				Word constant = new Word((byte)90, (byte)130, (byte)121, (byte)153);//5A827999
+                Word temp = (X[a].add((f1.add(g(f2, f3, f4))))).add(constant);
                 temp.shift(s);
                 f1 = temp;
             }
@@ -150,12 +120,8 @@ class Hashfunctions
             //r3 represents [A B C D i s] which now denotes: A = (A+ h(B,C,D) + X[i] + 6ED9EBA1) <<< s
             void r3(ref Word f1, Word f2, Word f3, Word f4, int a, int s)
             {
-                Word constant = new Word((byte)110, (byte)217, (byte)235, (byte)161);
-                Word temp = h(f2, f3, f4);
-                temp = temp.add(f1);
-                temp = temp.add(X[a]);
-                temp = temp.add(constant);
-                //Word temp = (X[a].add(f1.add(h(f2, f3, f4)))).add(constant);
+                Word constant = new Word((byte)110, (byte)217, (byte)235, (byte)161);//6ED9EBA1
+                Word temp = (X[a].add(f1.add(h(f2, f3, f4)))).add(constant);
                 temp.shift(s);
                 f1 = temp;
             }
@@ -184,13 +150,15 @@ class Hashfunctions
             D = D.add(DD);
 
         }
-        //returning the 128-bit sequence in hexadecimal format
+        //returning the 128-bit sequence (ABCD) in hexadecimal format
         return (A.toHexString()+B.toHexString()+C.toHexString()+D.toHexString());
 		
     }
 }
+
+
 /*class to allow for easy bitwise operations on 32bits.
- *methods:xor, and, or, complement, add,clone
+ *methods:xor, and, or, complement, add, clone, shift, toHexString,Rev
  */
 public class Word : ICloneable
 {
@@ -252,7 +220,7 @@ public class Word : ICloneable
 	//adds 2 words together and returns the result without changing state
 	public Word add(Word other)
 	{
-		Array.Reverse(bits);
+		Array.Reverse(bits);//we reverse the order of the bytes since we are using big endian notation whiles the BitConverter class uses little endian notation
 		other.Rev();
         uint thisbytes = BitConverter.ToUInt32(bits, 0);
         uint otherbytes = BitConverter.ToUInt32(other.bits, 0);
@@ -264,7 +232,7 @@ public class Word : ICloneable
         return new Word(result[0], result[1], result[2], result[3]);
     }
 
-	//returns the words' its hexadecimal string equivalent - low order first (no change to state)
+	//returns the words' its hexadecimal string equivalent assuming low endian notation(no change to state)
 	public String toHexString()
 	{
 		Array.Reverse(bits);
