@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Hashfunction;
 
-namespace hashing_algos
+namespace hashing_algos    
 {
     internal static class Program
     {
@@ -14,7 +16,8 @@ namespace hashing_algos
         [STAThread]
         static void Main()
         {
-            String result = Hashfunctions.MD5("hello");
+            //Starts the application
+            String result = Hashfunctions.MD5("Enter characters here");
             Console.WriteLine(result);
             Console.WriteLine("hello world");
             Application.EnableVisualStyles();

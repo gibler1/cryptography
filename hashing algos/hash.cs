@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using System.Diagnostics.Tracing;
+using hashing_algos;
+using static hashing_algos.Program;
 
-class Hashfunctions
+namespace Hashfunction
+{
+    public class Hashfunctions
 {
 	static public String MD4(string message)
 	{
@@ -341,8 +347,79 @@ class Hashfunctions
 
     }
 }
+    //Class to contain the method to decrypt different hashing algorithms
 
+    //Initializes the dictionary of common passwords to be used when cracking hashes
+  
+    public class Decrypt
+    {
+        PasswordDictionary Cpass = PasswordDictionary.Instance;
+        //Method to decrypt MD4 hashes
+        public String MD4(String Hashvalue)
+        {
+            foreach (String line in Cpass.GetDict())
+            {
+                if (Hashfunctions.MD4(line) == Hashvalue)
+                {
+                    return line;
+                }
+            }
+            return "Not found";
+        }
 
+        //Method to decrypt MD5 hashes
+        public String MD5(String Hashvalue)
+        {
+            foreach (String line in Cpass.GetDict())
+            {
+                if (Hashfunctions.MD5(line) == Hashvalue)
+                {
+                    return line;
+                }
+            }
+            return "Not found";
+        }
+    }
+}
+public class PasswordDictionary
+    {
+        private static PasswordDictionary instance;
+        public List<string> Dict { get; private set; }
+
+        //Adds the common passwords to the dictionary
+        private PasswordDictionary()
+        {
+            Dict = new List<string>();
+            TextReader words = File.OpenText("CPasscaps.csv");
+            while (true)
+            {
+                string line = words.ReadLine();
+                if (line == null)
+                {
+                    break;
+                }
+                Dict.Add(line);
+            }
+        }
+
+        public static PasswordDictionary Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new PasswordDictionary();
+                }
+                return instance;
+            }
+        }
+        
+        //Method to access the dictionary
+        public List<string> GetDict()
+        {
+            return Dict;
+        }
+    }
 /*class to allow for easy bitwise operations on 32bits.
  *methods:xor, and, or, complement, add, clone, shift, toHexString,Rev
  */
