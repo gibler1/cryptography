@@ -62,6 +62,14 @@ namespace hashing_algos
                 {
                     result.Text = Hashfunctions.MD4(input.Text);
                 }
+                else if (labelboxalg.Text == "SHA-1")
+                {
+                    result.Text = Hashfunctions.SHA1(input.Text);
+                }
+                else if (labelboxalg.Text == "SHA-256")
+                {
+                    result.Text = Hashfunctions.SHA256(input.Text);
+                }
             }
             else if (labelboxfun.Text == "Decrypt")
             {
@@ -73,6 +81,14 @@ namespace hashing_algos
                 else if (labelboxalg.Text == "MD4")
                 {
                     result.Text = Decrypt.MD4(input.Text);
+                }
+                else if (labelboxalg.Text == "SHA-1")
+                {
+                    result.Text = Decrypt.SHA1(input.Text);
+                }
+                else if (labelboxalg.Text == "SHA-256")
+                {
+                    result.Text = Decrypt.SHA256(input.Text);
                 }
             }
         }

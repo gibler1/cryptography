@@ -30,13 +30,13 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.labelboxalg = new System.Windows.Forms.ListBox();
             this.function = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.actionbutton = new System.Windows.Forms.Button();
             this.labelboxfun = new System.Windows.Forms.ListBox();
             this.input = new System.Windows.Forms.TextBox();
             this.result = new System.Windows.Forms.TextBox();
-            this.labelboxalg = new System.Windows.Forms.ListBox();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,6 +51,21 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(459, 184);
             this.panel1.TabIndex = 1;
+            // 
+            // labelboxalg
+            // 
+            this.labelboxalg.FormattingEnabled = true;
+            this.labelboxalg.ItemHeight = 19;
+            this.labelboxalg.Items.AddRange(new object[] {
+            "MD4",
+            "MD5",
+            "SHA-1",
+            "SHA-256"});
+            this.labelboxalg.Location = new System.Drawing.Point(98, 29);
+            this.labelboxalg.Name = "labelboxalg";
+            this.labelboxalg.Size = new System.Drawing.Size(361, 23);
+            this.labelboxalg.TabIndex = 7;
+            this.labelboxalg.SelectedIndexChanged += new System.EventHandler(this.labelboxalg_SelectedIndexChanged);
             // 
             // function
             // 
@@ -114,19 +129,6 @@
             this.result.Size = new System.Drawing.Size(459, 49);
             this.result.TabIndex = 4;
             // 
-            // labelboxalg
-            // 
-            this.labelboxalg.FormattingEnabled = true;
-            this.labelboxalg.ItemHeight = 19;
-            this.labelboxalg.Items.AddRange(new object[] {
-            "MD4",
-            "MD5"});
-            this.labelboxalg.Location = new System.Drawing.Point(98, 29);
-            this.labelboxalg.Name = "labelboxalg";
-            this.labelboxalg.Size = new System.Drawing.Size(361, 23);
-            this.labelboxalg.TabIndex = 7;
-            this.labelboxalg.SelectedIndexChanged += new System.EventHandler(this.labelboxalg_SelectedIndexChanged);
-            // 
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -137,7 +139,7 @@
             this.Controls.Add(this.panel1);
             this.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ForeColor = System.Drawing.SystemColors.Control;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Algorithm";

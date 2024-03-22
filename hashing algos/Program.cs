@@ -17,7 +17,7 @@ namespace hashing_algos
         static void Main()
         {
             //Starts the application
-            String result = Hashfunctions.MD5("Enter characters here");
+            String result = Hashfunctions.SHA256("61 62 63");
             Console.WriteLine(result);
             Console.WriteLine("hello world");
             Application.EnableVisualStyles();

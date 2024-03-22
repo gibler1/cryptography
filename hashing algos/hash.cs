@@ -10,6 +10,7 @@ using static hashing_algos.Program;
 
 namespace Hashfunction
 {
+    //Class to contain the hashing algorithms
     public class Hashfunctions
 {
 	static public String MD4(string message)
@@ -346,13 +347,272 @@ namespace Hashfunction
         return (A.toHexString() + B.toHexString() + C.toHexString() + D.toHexString());
 
     }
-}
-    //Class to contain the method to decrypt different hashing algorithms
+    
+    static public String SHA1(string message)
+    {
+        List<byte> words = Encoding.ASCII.GetBytes(message).ToList();//turn string into byte format to make it easier to work with
 
-    //Initializes the dictionary of common passwords to be used when cracking hashes
-  
+        //Step 1: appending padding bits to message
+        long originalBitLen = 8 * words.Count;
+        words.Add((byte)128);
+        long bitlength = originalBitLen + 8;
+        while (bitlength % 512 != 448)//loop to add continuous zeroes onto the end of out bit message till bitlength=448mod512
+        {
+            words.Add((byte)0);
+            bitlength += 8;
+        }
+
+        //Step 2: Append the 64-bit representation of the original number of bits to the list
+        List<byte> bitrep = BitConverter.GetBytes(originalBitLen).ToList();
+        bitrep.Reverse();
+        words.AddRange(bitrep);
+        long N = words.Count / 4;//number of 32-bit blocks
+
+        //Step 3: Initialising SHA-1 starting buffer
+        uint H0 = 0x67452301;
+        uint H1 = 0xEFCDAB89;
+        uint H2 = 0x98BADCFE;
+        uint H3 = 0x10325476;
+        uint H4 = 0xC3D2E1F0;
+        //Step 4:process the message using 80 rounds in blocks of 512 bits
+
+        /* auxillary equations outline:
+         *f(t;B,C,D) = (B ∧ C) OR (B'∧ D)              (0 <= t <= 19)
+         *f(t;B,C,D) = B XOR C XOR D                    (20 <= t <= 39)
+         *f(t;B,C,D) = (B ∧ C) OR (B ∧ D) OR (C ∧ D)  (40 <= t <= 59)
+         *f(t;B,C,D) = B XOR C XOR D                    (60 <= t <= 79).
+		 */
+        uint f(int t,uint x, uint y, uint z)
+        {
+            if (t < 20)
+            {
+                return (x & y) | (~x & z);
+            }
+            else if (t < 40)
+            {
+                return x ^ y ^ z;
+            }
+            else if (t < 60)
+            {
+                return (x & y) | (x & z) | (y & z);
+            }
+            else
+            {
+                return x ^ y ^ z;
+            }
+        }
+
+        //Initialising the K table - a table which holds constants used in the rounds
+        uint[] K = new uint[80];
+        for (int i = 0; i < 80; i++)
+        {
+            if(i<20)
+            {
+                K[i] = 0x5A827999;
+            }
+            else if(i<40)
+            {
+                K[i] = 0x6ED9EBA1;
+            }
+            else if(i<60)
+            {
+                K[i] = 0x8F1BBCDC;
+            }
+            else
+            {
+                K[i] = 0xCA62C1D6;
+            }
+        }
+
+        //Loop to iterate over the padded message in 512bit blocks using 80 rounds for each block:
+        for (int i = 0; i < N / 16; i++)
+        {
+            //initialise the 16word block which will be processed
+            uint[] X = new uint[80];
+            for (int j = 0; j < 80; j++)
+            {
+                if (j < 16)
+                {
+                    byte[] temp = { words[(i * 16 + j) * 4], words[(i * 16 + j) * 4 + 1], words[(i * 16 + j) * 4 + 2], words[(i * 16 + j) * 4 + 3] };
+                    Array.Reverse(temp);
+                    X[j] = BitConverter.ToUInt32(temp, 0);
+                }
+                else
+                {
+                        X[j] = (X[j - 3] ^ X[j - 8] ^ X[j - 14] ^ X[j - 16]);
+                        X[j] = (uint)(X[j] << 1 | X[j] >> 31);
+                }
+            }
+            //initialise the variables which will be used in this block
+            uint A = H0;
+            uint B = H1;
+            uint C = H2;
+            uint D = H3;
+            uint E = H4;
+
+            //Start the 80 rounds
+            for(int j = 0; j< 80; j++)
+            {
+                uint temp = (uint)(A << 5 | A >> 27) + f(j,B,C,D) + E + X[j] + K[j];
+                E = D; 
+                D = C;
+                C = (uint)(B << 30 | B >> 2);
+                B = A;
+                A = temp;
+            }
+
+           
+            /*END of rounds*/
+            //final block additions
+            H0 = H0 + A;
+            H1 = H1 + B;
+            H2 = H2 + C;
+            H3 = H3 + D;
+            H4 = H4 + E;
+        }
+        //returning the 128-bit sequence (ABCD) in hexadecimal format
+        return (H0.ToString("x")+H1.ToString("x") +H2.ToString("x")+H3.ToString("x")+H4.ToString("x"));
+    }
+    static public String SHA256(string message)
+    {
+        List<byte> words = Encoding.ASCII.GetBytes(message).ToList();//turn string into byte format to make it easier to work with
+
+        //Step 1: appending padding bits to message
+        long originalBitLen = 8 * words.Count;
+        words.Add((byte)128);
+        long bitlength = originalBitLen + 8;
+        while (bitlength % 512 != 448)//loop to add continuous zeroes onto the end of out bit message till bitlength=448mod512
+        {
+            words.Add((byte)0);
+            bitlength += 8;
+        }
+
+        //Step 2: Append the 64-bit representation of the original number of bits to the list
+        List<byte> bitrep = BitConverter.GetBytes(originalBitLen).ToList();
+        bitrep.Reverse();
+        words.AddRange(bitrep);
+        long N = words.Count / 4;//number of 32-bit blocks (i.e. number of words)
+
+        //Step 3: Initialising SHA-256 starting buffer (first 32 bits of the fractional parts of the first 8 primes)
+        uint H1 = 0x6a09e667;
+        uint H2 = 0xbb67ae85;
+        uint H3 = 0x3c6ef372;
+        uint H4 = 0xa54ff53a;
+        uint H5 = 0x510e527f;
+        uint H6 = 0x9b05688c;
+        uint H7 = 0x1f83d9ab;
+        uint H8 = 0x5be0cd19;
+
+        //Step 4:process the message using 64 rounds in 512bit blocks
+
+        /* auxillary equations outline:
+         *Ch(X, Y, Z) = (X ∧ Y ) ⊕ (X ∧ Z)
+         *Maj(X, Y, Z) = (X ∧ Y ) ⊕ (X ∧ Z) ⊕ (Y ∧ Z)
+         *Sig0(X) = RotR(X, 2) ⊕ RotR(X, 13) ⊕ RotR(X, 22)
+         *Sig1(X) = RotR(X, 6) ⊕ RotR(X, 11) ⊕ RotR(X, 25),
+         *lowerSig0(X) = RotR(X, 7) ⊕ RotR(X, 18) ⊕ ShR(X, 3),
+         *lowerSig1(X) = RotR(X, 17) ⊕ RotR(X, 19) ⊕ ShR(X, 10),
+		 */
+        uint Ch(uint x, uint y, uint z)
+        {
+            return (x & y) ^ (~x & z);
+        }
+        uint Maj(uint x, uint y, uint z)
+        {
+            return (x & y) ^ (x & z) ^ (y & z);
+        }
+        uint Sig0(uint x)
+        {
+            return (x >> 2 | x << 30) ^ (x >> 13 | x << 19) ^ (x >> 22 | x << 10);
+        }
+        uint Sig1(uint x)
+        {
+            return (x >> 6 | x << 26) ^ (x >> 11 | x << 21) ^ (x >> 25 | x << 7);
+        }
+        uint lowerSig0(uint x)
+        {
+            return (x >> 7 | x << 25) ^ (x >> 18 | x << 14) ^ (x >> 3);
+        }
+        uint lowerSig1(uint x)
+        {
+            return (x >> 17 | x << 15) ^ (x >> 19 | x << 13) ^ (x >> 10);
+        }
+
+        //Initialising the K table - a table which holds constants used in the rounds
+        uint[] K = { 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+                     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+                     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+                     0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+                     0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+                     0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+                     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+                     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 };
+
+            
+
+        //Loop to iterate over the padded message in 512bit blocks using 64 rounds for each block:
+        for (int i = 0; i < N / 16; i++)
+        {
+            //initialise the 16word block which will be processed
+            uint[] X = new uint[64];
+            for (int j = 0; j < 64; j++)
+            {
+                if (j < 16)
+                {
+                    byte[] temp = { words[(i * 16 + j) * 4], words[(i * 16 + j) * 4 + 1], words[(i * 16 + j) * 4 + 2], words[(i * 16 + j) * 4 + 3] };
+                    Array.Reverse(temp);
+                    X[j] = BitConverter.ToUInt32(temp, 0);
+                }
+                else
+                {
+                        X[j] = lowerSig1(X[j - 2]) + X[j - 7] + lowerSig0(X[j - 15]) + X[j - 16];
+                }
+            }
+            //initialise the variables which will be used in this block
+            uint A = H1;
+            uint B = H2;
+            uint C = H3;
+            uint D = H4;
+            uint E = H5;
+            uint F = H6;
+            uint G = H7;
+            uint H = H8;
+
+            //Start the 64 rounds
+            for(int j = 0; j< 64; j++)
+            {
+                uint temp1 = H + Sig1(E) + Ch(E, F, G) + K[j] + X[j];
+                uint temp2 = Sig0(A) + Maj(A, B, C);
+                H = G; 
+                G = F;
+                F = E;
+                E = D + temp1;
+                D = C;
+                C = B;
+                B = A;
+                A = temp1 + temp2;
+            }
+
+           
+            /*END of rounds*/
+            //final block additions
+            H1= H1 + A;
+            H2 = H2 + B;
+            H3 = H3 + C;
+            H4 = H4 + D;
+            H5 = H5 + E;
+            H6 = H6 + F;
+            H7 = H7 + G;
+            H8 = H8 + H;
+        }
+        //returning the 128-bit sequence (ABCD) in hexadecimal format
+        return (H1.ToString("x") +H2.ToString("x")+H3.ToString("x")+H4.ToString("x")+H5.ToString("x") + H6.ToString("x") + H7.ToString("x") + H8.ToString("x"));
+    }
+}
+    //Class to contain the method to decrypt different hashing algorithms  
     public class Decrypt
     {
+        //Initializes the dictionary of common passwords to be used when cracking hashes
         PasswordDictionary Cpass = PasswordDictionary.Instance;
         //Method to decrypt MD4 hashes
         public String MD4(String Hashvalue)
@@ -379,8 +639,35 @@ namespace Hashfunction
             }
             return "Not found";
         }
+        
+        //Method to decrypt SHA-1 hashes
+        public String SHA1(String Hashvalue)
+        {
+            foreach (String line in Cpass.GetDict())
+            {
+                if (Hashfunctions.SHA1(line) == Hashvalue)
+                {
+                    return line;
+                }
+            }
+            return "Not found";
+        }
+        //Method to decrypt SHA-256 hashes
+        public String SHA256(String Hashvalue)
+        {
+            foreach (String line in Cpass.GetDict())
+            {
+                if (Hashfunctions.SHA256(line) == Hashvalue)
+                {
+                    return line;
+                }
+            }
+            return "Not found";
+        }
     }
 }
+
+//Class to contain the list of common passwords to be used when cracking hashes
 public class PasswordDictionary
     {
         private static PasswordDictionary instance;
@@ -421,7 +708,7 @@ public class PasswordDictionary
         }
     }
 /*class to allow for easy bitwise operations on 32bits.
- *methods:xor, and, or, complement, add, clone, shift, toHexString,Rev
+ *methods:xor, and, or, complement, add, clone, shift, toHexString,Rev,touint
  */
 public class Word : ICloneable
 {
@@ -504,6 +791,12 @@ public class Word : ICloneable
 		return answer;
     }
 
+    //returns the words' its uint equivalent assuming low endian notation(no change to state)
+    public uint touint()
+    {
+        uint answer = BitConverter.ToUInt32(bits, 0);
+        return answer;
+    }
     //method to reverse the order/endianness of the bytes - changes the state
     public void Rev()
 	{
