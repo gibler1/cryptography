@@ -52,23 +52,30 @@ namespace hashing_algos
 
         private void button1_Click(object sender, EventArgs e)
         {
+            string temp = input.Text;
+            string tempresult = "";
+            if (saltCheck.Checked)
+            {
+                temp = saltValue.Text + temp;
+            }
+
             if (labelboxfun.Text == "Hash")
             {
                 if (labelboxalg.Text == "MD5")
                 {
-                    result.Text = Hashfunctions.MD5(input.Text);
+                    tempresult = Hashfunctions.MD5(temp);
                 }
                 else if (labelboxalg.Text == "MD4")
                 {
-                    result.Text = Hashfunctions.MD4(input.Text);
+                    tempresult = Hashfunctions.MD4(temp);
                 }
                 else if (labelboxalg.Text == "SHA-1")
                 {
-                    result.Text = Hashfunctions.SHA1(input.Text);
+                    tempresult = Hashfunctions.SHA1(temp);
                 }
                 else if (labelboxalg.Text == "SHA-256")
                 {
-                    result.Text = Hashfunctions.SHA256(input.Text);
+                    tempresult = Hashfunctions.SHA256(temp);
                 }
             }
             else if (labelboxfun.Text == "Decrypt")
@@ -76,24 +83,63 @@ namespace hashing_algos
                 Decrypt Decrypt = new Decrypt();
                 if (labelboxalg.Text == "MD5")
                 {
-                    result.Text = Decrypt.MD5(input.Text);
+                    tempresult = Decrypt.MD5(temp);
                 }
                 else if (labelboxalg.Text == "MD4")
                 {
-                    result.Text = Decrypt.MD4(input.Text);
+                    tempresult = Decrypt.MD4(temp);
                 }
                 else if (labelboxalg.Text == "SHA-1")
                 {
-                    result.Text = Decrypt.SHA1(input.Text);
+                    tempresult = Decrypt.SHA1(temp);
                 }
                 else if (labelboxalg.Text == "SHA-256")
                 {
-                    result.Text = Decrypt.SHA256(input.Text);
+                    tempresult = Decrypt.SHA256(temp);
                 }
+            }
+
+            if (saltCheck.Checked && labelboxfun.Text != "Decrypt")
+            {
+                result.Text = saltValue.Text + "$" + tempresult;
+            }
+            else
+            {
+                result.Text = tempresult;
             }
         }
 
         private void labelboxalg_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            saltValue.Visible = !saltValue.Visible;
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void saltValue_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            System.Windows.Forms.Clipboard.SetText(result.Text);
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
         {
 
         }
